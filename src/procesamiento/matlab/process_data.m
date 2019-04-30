@@ -1,6 +1,6 @@
 close all
 cd ../../../data/acelerometros/333B32PCB/
-data = csvread('CarruselVertical.csv', 1, 0);
+data = csvread('CarruselVertical2.csv', 1, 0);
 cd ../../../src/procesamiento/matlab/
 
 a1 = data(:,2);	%43869 -> base acrilico
@@ -8,42 +8,55 @@ a2 = data(:,3);	%43875 -> soporte base
 a3 = data(:,4);	%43815 -> soporte vertical
 time = data(:,1);
 
-a3window = a3(5.586e4:7.95e5);
-timewindow = time(5.586e4:7.95e5);
+a = a3;
+
+awindow = a(5.595e4:7.967e5);
+timewindow = time(5.595e4:7.967e5);
 timewindow = timewindow - min(timewindow);
 
 figure()
-plot(a1)
+plot(time, a1)
+grid on
+title('Prueba Carrusel Vertical, Acelerómetro Carrusel')
+xlabel('Tiempo [s]'); ylabel('Aceleración [g]');
 
 figure()
-plot(a2)
-
-figure()
-plot(a3)
+plot(time, a2)
+grid on
+title('Prueba Carrusel Vertical, Acelerómetro Base acrilico')
+xlabel('Tiempo [s]'); ylabel('Aceleración [g]');
 
 figure()
 plot(time, a3)
+grid on
+title('Prueba Carrusel Vertical, Acelerómetro Soporte Lateral')
+xlabel('Tiempo [s]'); ylabel('Aceleración [g]');
 
 figure()
-plot(timewindow, a3window)
+plot(a)
 
-a3_filt = filterData( timewindow, a3window );
+figure()
+plot(timewindow, awindow)
 
-[pxx,w] = periodogram(a3_filt,rectwin(length(a3_filt)),length(a3_filt), 12e3, 'psd');
+a_filt = filterData( timewindow, awindow );
+
+[pxx,w] = periodogram(a_filt,rectwin(length(a_filt)),length(a_filt), 12e3, 'psd');
 
 psd_filt = filterPSD(pxx, w);
 
 % calcPsdSpectrum;
 
-Grms = calcGrms(w, psd_filt, 60);
+Grms = calcGrms(w(500:end-200000), psd_filt(500:end-200000), 200);
 
 % Plot
 figure()
 loglog(w,pxx); hold on;grid on;
 loglog(freqPoints, accelPoints, 'o-');
 loglog(freq, accel, 'o-');
-loglog(w(3000:end-224000),psd_filt(3000:end-224000));
+loglog(w(500:end-200000),psd_filt(500:end-200000));
 
-title('Densidad de Potencia Espectral (PSD)')
+title('PSD Prueba Carrusel Vertical Acelerómetro Soporte Lateral')
 xlabel('Frecuencia [Hz]'); ylabel('Aceleración [g^2/Hz]');
-legend('Medida','Especificación','Extrapolación', 'Filtrada', 'pmpt');
+legend('Medida','Especificación','Extrapolación', 'Filtrada');
+
+% FFT Prueba Carrusel Vertical, Acelerómetro carrusel NO Filtrada
